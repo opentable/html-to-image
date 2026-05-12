@@ -10,7 +10,7 @@ import {
   compareToRefImage,
   assertTextRendered,
 } from './helper'
-import { toPng, toSvg } from '../../src'
+import { toBlob, toPng, toSvg } from '../../src'
 
 describe('work with options', () => {
   it('should apply width and height options to node copy being rendered', (done) => {
@@ -182,6 +182,48 @@ describe('work with options', () => {
   it('should support cache busting', (done) => {
     bootstrap('images/node.html', 'images/style.css')
       .then(assertTextRendered(['PNG', 'JPG'], { cacheBust: true }))
+      .then(done)
+      .catch(done)
+  })
+})
+
+describe('toBlob', () => {
+  it('should return a PNG blob when no type is specified', (done) => {
+    bootstrap('bgcolor/node.html', 'bgcolor/style.css')
+      .then((node) => toBlob(node))
+      .then((blob) => {
+        expect(blob).not.toBeNull()
+        expect(blob!.type).toBe('image/png')
+      })
+      .then(done)
+      .catch(done)
+  })
+
+  it('should return a JPEG blob when type is image/jpeg', (done) => {
+    bootstrap('bgcolor/node.html', 'bgcolor/style.css')
+      .then((node) => toBlob(node, { type: 'image/jpeg' }))
+      .then((blob) => {
+        expect(blob).not.toBeNull()
+        expect(blob!.type).toBe('image/jpeg')
+      })
+      .then(done)
+      .catch(done)
+  })
+
+  it('should respect quality option when type is image/jpeg', (done) => {
+    let lowBlob: Blob | null
+    bootstrap('bgcolor/node.html', 'bgcolor/style.css')
+      .then((node) =>
+        toBlob(node, { type: 'image/jpeg', quality: 0.1 }).then((blob) => {
+          lowBlob = blob
+          return toBlob(node, { type: 'image/jpeg', quality: 1 })
+        }),
+      )
+      .then((highBlob) => {
+        expect(lowBlob).not.toBeNull()
+        expect(highBlob).not.toBeNull()
+        expect(lowBlob!.size).toBeLessThan(highBlob!.size)
+      })
       .then(done)
       .catch(done)
   })
