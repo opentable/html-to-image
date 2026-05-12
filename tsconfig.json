@@ -1,6 +1,7 @@
 {
- "extends": "@bubkoo/tsconfig",
-  "include": [
-    "src/**/*.ts"
-  ]
+  "extends": "@bubkoo/tsconfig",
+  "compilerOptions": {
+    "types": ["node"]
+  },
+  "include": ["src/**/*.ts"]
 }
